@@ -35,7 +35,7 @@ $config = [
     'host' => env('DB_HOST', 'localhost'),
     'db' => env('DB_NAME', 'ecommerce'),
     'user' => env('DB_USER', 'root'),
-    'pass' => env('DB_PASS', 'f81%FE5#B*L^l*s'),
+    'pass' => env('DB_PASS', ''),
     'charset' => env('DB_CHARSET', 'utf8mb4'),
 ];
 
