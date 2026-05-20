@@ -31,7 +31,9 @@ unset($_SESSION['erro_login']);
           <i class="bx bxs-lock-alt"></i>
         </div>
         <div class="forgot-link">
-          <a href="#">Esqueceu a senha?</a>
+          <a href="<?php echo url('forgot-password'); ?>">
+              Esqueceu a senha?
+          </a>
         </div>
         <button type="submit" class="btn">Entrar</button>
       </form>
