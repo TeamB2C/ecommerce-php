@@ -7,13 +7,18 @@
         perfilLink.addEventListener('click', function(event) {
             if ('<?php echo $usuario['logado'] ? 'true' : 'false'; ?>' === 'true') {
                 event.preventDefault();
-                perfilDropdown.classList.toggle('show');
+                event.stopPropagation();
+                perfilDropdown.classList.toggle('ativo');
             }
+        });
+
+        perfilDropdown.addEventListener('click', function(event) {
+            event.stopPropagation();
         });
 
         document.addEventListener('click', function(event) {
             if (!perfilLink.contains(event.target) && !perfilDropdown.contains(event.target)) {
-                perfilDropdown.classList.remove('show');
+                perfilDropdown.classList.remove('ativo');
             }
         });
     }

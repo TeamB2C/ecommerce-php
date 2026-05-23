@@ -188,10 +188,12 @@
                 </a>
               </h3>
               <?php if ((float)$produto['preco'] > 0): ?>
-                <button type="button" class="btn-adicionar-sacola"
-                  onclick="adicionarAoCarrinho(<?php echo (int)$produto['id']; ?>,1,'<?php echo csrf_token(); ?>')">
-                  Adicionar à sacola
-                </button>
+                <form action="<?php echo url('adicionar_ao_carrinho.php'); ?>" method="POST" class="js-add-cart">
+                  <?php echo csrf_field(); ?>
+                  <input type="hidden" name="produto_id" value="<?php echo (int) $produto['id']; ?>">
+                  <input type="hidden" name="quantidade" value="1">
+                  <button type="submit" class="btn-adicionar-sacola">Adicionar à sacola</button>
+                </form>
               <?php endif; ?>
             </div>
           <?php endforeach; ?>

@@ -2,7 +2,7 @@
 
 :root {
   --brand:        pink;
-  --brand-dark:   pink;
+  --brand-dark:   #be1a77;
   --brand-pale:   #fdf5fa;
   --text:         #333;
   --text-muted:   #666;
@@ -34,12 +34,12 @@ ul { list-style: none; }
 
 .overlay {
   position: fixed; inset: 0;
-  background: pink;
+  background: rgba(0, 0, 0, 0.4);
   z-index: 900; display: none; pointer-events: none;
 }
 .overlay.ativo, .overlay.mostrar { display: block; pointer-events: all; }
 
-.pagina-container { padding-top: var(--header-total); }
+.pagina-container { padding-top: var(--total-header, var(--header-total)); }
 
 .catalogo { padding: 0 0 60px; }
 .catalogo-container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
@@ -86,7 +86,7 @@ ul { list-style: none; }
   width: calc(100% - 24px);
   margin: 8px 12px 14px;
   padding: 11px;
-  background: pink;
+  background: var(--brand);
   color: #fff;
   border: none;
   font-size: 11px;
@@ -97,7 +97,7 @@ ul { list-style: none; }
   transition: background var(--trans);
   border-radius: var(--radius);
 }
-.btn-adicionar-sacola:hover { background: #be1a77; }
+.btn-adicionar-sacola:hover { background: var(--brand-dark); }
 
 /* SECTION TITLE */
 .section-title {
@@ -131,7 +131,7 @@ ul { list-style: none; }
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  margin-top: calc(-1 * var(--header-total));
+  margin-top: calc(-1 * var(--total-header, var(--header-total)));
 }
 .banner-section img { width: 100%; height: auto; display: block; }
 

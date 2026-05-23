@@ -50,7 +50,7 @@ if (!$produto) {
                     <?php echo htmlspecialchars($produto['categoria'] ?? 'Não especificada', ENT_QUOTES, 'UTF-8'); ?></p>
                 <p class="preco">R$ <?php echo number_format((float) $produto['preco'], 2, ',', '.'); ?></p>
 
-                <form action="<?php echo url('adicionar_ao_carrinho.php'); ?>" method="POST">
+                <form action="<?php echo url('adicionar_ao_carrinho.php'); ?>" method="POST" class="js-add-cart">
                     <?php echo csrf_field(); ?>
                     <input type="hidden" name="produto_id" value="<?php echo (int) $produto['id']; ?>">
                     <input type="hidden" name="quantidade" value="1">

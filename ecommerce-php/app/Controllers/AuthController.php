@@ -18,51 +18,31 @@ class AuthController extends Controller
         $this->cartModel = new Cart($pdo);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOGIN + REGISTRO
-    |--------------------------------------------------------------------------
-    */
-
     public function loginRegister(): void
     {
-        /*
-        |--------------------------------------------------------------------------
-        | LOGIN
-        |--------------------------------------------------------------------------
-        */
+        $expectsJson = $this->expectsJson();
 
-        if (
-            $_SERVER['REQUEST_METHOD'] === 'POST'
-            && ($_POST['acao'] ?? '') === 'login'
-        ) {
-
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'login') {
             require_csrf($_POST['_csrf'] ?? null);
 
-            $email = filter_var(
-                trim((string)($_POST['email'] ?? '')),
-                FILTER_VALIDATE_EMAIL
-            );
-
-            $senha = trim((string)($_POST['senha'] ?? ''));
+            $email = filter_var(trim((string) ($_POST['email'] ?? '')), FILTER_VALIDATE_EMAIL);
+            $senha = trim((string) ($_POST['senha'] ?? ''));
 
             if (!$email || $senha === '') {
-
-                $_SESSION['erro_login'] =
-                    'Informe e-mail e senha válidos.';
+                $message = 'Informe e-mail e senha válidos.';
+                $_SESSION['erro_login'] = $message;
+                if ($expectsJson) {
+                    $this->jsonResponse(['ok' => false, 'message' => $message], 422);
+                    return;
+                }
 
                 $this->redirect('login');
                 return;
             }
 
-            $usuario = $this->userModel->findByEmail((string)$email);
+            $usuario = $this->userModel->findByEmail((string) $email);
 
-            if (
-                $usuario &&
-                isset($usuario['senha']) &&
-                password_verify($senha, $usuario['senha'])
-            ) {
-
+            if ($usuario && isset($usuario['senha']) && password_verify($senha, $usuario['senha'])) {
                 $_SESSION['usuario_id'] = $usuario['id'];
                 $_SESSION['nome'] = $usuario['nome'];
                 $_SESSION['email'] = $usuario['email'];
@@ -71,9 +51,18 @@ class AuthController extends Controller
 
                 $this->cartModel->syncSessionToDatabase();
 
-                if ((int)$usuario['is_admin'] === 1) {
+                if ((int) $usuario['is_admin'] === 1) {
+                    if ($expectsJson) {
+                        $this->jsonResponse(['ok' => true, 'redirect' => url('admin')]);
+                        return;
+                    }
 
                     $this->redirect('admin');
+                    return;
+                }
+
+                if ($expectsJson) {
+                    $this->jsonResponse(['ok' => true, 'redirect' => url('')]);
                     return;
                 }
 
@@ -81,104 +70,78 @@ class AuthController extends Controller
                 return;
             }
 
-            $_SESSION['erro_login'] =
-                'E-mail ou senha incorretos.';
+            $message = 'E-mail ou senha incorretos.';
+            $_SESSION['erro_login'] = $message;
+            if ($expectsJson) {
+                $this->jsonResponse(['ok' => false, 'message' => $message], 401);
+                return;
+            }
 
             $this->redirect('login');
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | REGISTRO
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $_SERVER['REQUEST_METHOD'] === 'POST'
-            && ($_POST['acao'] ?? '') === 'registrar'
-        ) {
-
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'registrar') {
             require_csrf($_POST['_csrf'] ?? null);
 
-            $nome = trim((string)($_POST['nome'] ?? ''));
+            $nome = trim((string) ($_POST['nome'] ?? ''));
+            $email = filter_var(trim((string) ($_POST['email'] ?? '')), FILTER_VALIDATE_EMAIL);
+            $senha = trim((string) ($_POST['senha'] ?? ''));
 
-            $email = filter_var(
-                trim((string)($_POST['email'] ?? '')),
-                FILTER_VALIDATE_EMAIL
-            );
+            $senhaRegex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/';
 
-            $senha = trim((string)($_POST['senha'] ?? ''));
+            if ($nome === '' || !$email || !preg_match($senhaRegex, $senha)) {
+                $erro = 'A senha deve conter no mínimo 8 caracteres, letra maiúscula, minúscula, número e caractere especial.';
+                if ($expectsJson) {
+                    $this->jsonResponse(['ok' => false, 'message' => $erro], 422);
+                    return;
+                }
 
-            $senhaRegex =
-                '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/';
-
-            if (
-                $nome === ''
-                || !$email
-                || !preg_match($senhaRegex, $senha)
-            ) {
-
-                $erro =
-                    'A senha deve conter no mínimo 8 caracteres, letra maiúscula, minúscula, número e caractere especial.';
-
-                $this->view('auth.login_register', [
-                    'erroRegistro' => $erro
-                ]);
-
+                $this->view('auth.login_register', ['erroRegistro' => $erro]);
                 return;
             }
 
-            $usuarioExistente =
-                $this->userModel->findByEmail((string)$email);
+            $usuarioExistente = $this->userModel->findByEmail((string) $email);
 
             if ($usuarioExistente) {
-
                 $erro = 'Este e-mail já está cadastrado.';
+                if ($expectsJson) {
+                    $this->jsonResponse(['ok' => false, 'message' => $erro], 409);
+                    return;
+                }
 
-                $this->view('auth.login_register', [
-                    'erroRegistro' => $erro
-                ]);
-
+                $this->view('auth.login_register', ['erroRegistro' => $erro]);
                 return;
             }
 
-            $resultado = $this->userModel->createCustomer(
-                $nome,
-                (string)$email,
-                $senha
-            );
+            $resultado = $this->userModel->createCustomer($nome, (string) $email, $senha);
 
             if ($resultado === true) {
-
-                $_SESSION['sucesso'] =
-                    'Cadastro realizado com sucesso!';
+                $_SESSION['sucesso'] = 'Cadastro realizado com sucesso!';
+                if ($expectsJson) {
+                    $this->jsonResponse([
+                        'ok' => true,
+                        'message' => 'Cadastro realizado com sucesso! Faça login para continuar.',
+                    ]);
+                    return;
+                }
 
                 $this->redirect('login');
                 return;
             }
 
-            $erro = is_string($resultado)
-                ? $resultado
-                : 'Não foi possível concluir o cadastro.';
+            $erro = is_string($resultado) ? $resultado : 'Não foi possível concluir o cadastro.';
+            if ($expectsJson) {
+                $this->jsonResponse(['ok' => false, 'message' => $erro], 500);
+                return;
+            }
 
-            $this->view('auth.login_register', [
-                'erroRegistro' => $erro
-            ]);
-
+            $this->view('auth.login_register', ['erroRegistro' => $erro]);
             return;
         }
 
-        $this->view('auth.login_register', [
-            'erroRegistro' => null
-        ]);
+        $this->view('auth.login_register', ['erroRegistro' => null]);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | LOGOUT
-    |--------------------------------------------------------------------------
-    */
 
     public function logout(): void
     {
@@ -188,74 +151,38 @@ class AuthController extends Controller
         $this->redirect('');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | FORGOT PASSWORD
-    |--------------------------------------------------------------------------
-    */
-
     public function forgotPassword(): void
     {
         $this->view('auth.forgot_password');
     }
 
-/*
-|--------------------------------------------------------------------------
-| SEND RESET
-|--------------------------------------------------------------------------
-*/
+    public function sendReset(): void
+    {
+        require_csrf($_POST['_csrf'] ?? null);
 
-public function sendReset(): void
-{
-    require_csrf($_POST['_csrf'] ?? null);
+        $email = filter_var(trim((string) ($_POST['email'] ?? '')), FILTER_VALIDATE_EMAIL);
 
-    $email = filter_var(
-        trim((string)($_POST['email'] ?? '')),
-        FILTER_VALIDATE_EMAIL
-    );
+        if (!$email) {
+            $_SESSION['erro_reset'] = 'Informe um e-mail válido.';
+            $this->redirect('forgot-password');
+            return;
+        }
 
-    if (!$email) {
+        $usuario = $this->userModel->findByEmail($email);
 
-        $_SESSION['erro_reset'] =
-            'Informe um e-mail válido.';
+        if (!$usuario) {
+            $_SESSION['erro_reset'] = 'E-mail não encontrado.';
+            $this->redirect('forgot-password');
+            return;
+        }
 
-        $this->redirect('forgot-password');
-        return;
+        $token = bin2hex(random_bytes(32));
+        $this->userModel->saveResetToken((int) $usuario['id'], $token);
+
+        $resetLink = url('reset-password') . '?token=' . urlencode($token);
+
+        $this->view('auth.reset_link', ['resetLink' => $resetLink]);
     }
-
-    $usuario = $this->userModel->findByEmail($email);
-
-    if (!$usuario) {
-
-        $_SESSION['erro_reset'] =
-            'E-mail não encontrado.';
-
-        $this->redirect('forgot-password');
-        return;
-    }
-
-    $token = bin2hex(random_bytes(32));
-
-    $this->userModel->saveResetToken(
-        (int)$usuario['id'],
-        $token
-    );
-
-    $resetLink =
-        url('reset-password')
-        . '?token=' .
-        urlencode($token);
-
-    $this->view('auth.reset_link', [
-        'resetLink' => $resetLink
-    ]);
-}
-
-    /*
-    |--------------------------------------------------------------------------
-    | RESET PASSWORD PAGE
-    |--------------------------------------------------------------------------
-    */
 
     public function resetPassword(): void
     {
@@ -265,65 +192,56 @@ public function sendReset(): void
             die('Token inválido.');
         }
 
-        $usuario =
-            $this->userModel->findByResetToken($token);
+        $usuario = $this->userModel->findByResetToken($token);
 
         if (!$usuario) {
             die('Token expirado ou inválido.');
         }
 
-        $this->view('auth.reset_password', [
-            'token' => $token
-        ]);
+        $this->view('auth.reset_password', ['token' => $token]);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE PASSWORD
-    |--------------------------------------------------------------------------
-    */
 
     public function updatePassword(): void
     {
         require_csrf($_POST['_csrf'] ?? null);
 
         $token = trim($_POST['token'] ?? '');
-
         $senha = trim($_POST['senha'] ?? '');
 
-        $senhaRegex =
-            '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/';
+        $senhaRegex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/';
 
         if (!preg_match($senhaRegex, $senha)) {
-
-            $_SESSION['erro_reset'] =
-                'Senha inválida.';
-
-            header(
-                'Location: ' .
-                url('reset-password') .
-                '?token=' .
-                urlencode($token)
-            );
-
+            $_SESSION['erro_reset'] = 'Senha inválida.';
+            header('Location: ' . url('reset-password') . '?token=' . urlencode($token));
             exit;
         }
 
-        $usuario =
-            $this->userModel->findByResetToken($token);
+        $usuario = $this->userModel->findByResetToken($token);
 
         if (!$usuario) {
             die('Token inválido ou expirado.');
         }
 
-        $this->userModel->updatePassword(
-            (int)$usuario['id'],
-            $senha
-        );
+        $this->userModel->updatePassword((int) $usuario['id'], $senha);
 
-        $_SESSION['sucesso'] =
-            'Senha alterada com sucesso!';
+        $_SESSION['auth_success'] = 'Senha alterada com sucesso! Faça login com sua nova senha.';
+        header('Location: ' . url('') . '?auth=login');
+        exit;
+    }
 
-        $this->redirect('login');
+    private function expectsJson(): bool
+    {
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        $requestedWith = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+
+        return stripos((string) $accept, 'application/json') !== false
+            || strtolower((string) $requestedWith) === 'xmlhttprequest';
+    }
+
+    private function jsonResponse(array $payload, int $status = 200): void
+    {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }

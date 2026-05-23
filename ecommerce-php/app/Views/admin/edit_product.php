@@ -76,7 +76,7 @@
             include __DIR__ . '/../partials/admin/topbar.php';
             ?>
 
-            <div class="flex items-center gap-2 text-sm text-gray-400">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-gray-400">
                 <a href="<?php echo url('admin/produtos'); ?>"
                     class="hover:text-pink-600 transition-colors font-medium">Produtos</a>
                 <i class="fas fa-chevron-right text-xs"></i>
@@ -95,13 +95,13 @@
                 </div>
             <?php endif; ?>
 
-            <div class="glass-card rounded-3xl shadow-sm overflow-hidden max-w-3xl">
-                <div class="px-8 py-6 border-b border-gray-100 flex items-center gap-4">
+            <div class="glass-card rounded-3xl shadow-sm overflow-hidden max-w-3xl mx-auto">
+                <div class="px-4 md:px-8 py-5 md:py-6 border-b border-gray-100 flex items-center gap-4">
                     <a href="<?php echo url('admin/produtos'); ?>"
                         class="h-9 w-9 flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl hover:bg-pink-50 hover:text-pink-600 transition-all">
                         <i class="fas fa-arrow-left text-sm"></i>
                     </a>
-                    <div class="flex items-center gap-4 flex-1">
+                    <div class="flex items-start sm:items-center gap-4 flex-1 min-w-0">
                         <?php if (!empty($produto['imagem'])): ?>
                             <img
                                 src="<?php echo asset_url('images/produtos/' . htmlspecialchars((string) ($produto['imagem'] ?? ''), ENT_QUOTES, 'UTF-8')); ?>"
@@ -111,8 +111,8 @@
                                 <i class="fas fa-image text-pink-300 text-lg"></i>
                             </div>
                         <?php endif; ?>
-                        <div>
-                            <h2 class="text-xl font-extrabold text-gray-900 tracking-tight">
+                        <div class="min-w-0">
+                            <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight break-words">
                                 <?php echo htmlspecialchars((string) ($produto['nome'] ?? 'Editar Produto'), ENT_QUOTES, 'UTF-8'); ?>
                             </h2>
                             <p class="text-gray-400 text-xs font-medium mt-0.5">Edite os dados do produto</p>
@@ -122,7 +122,7 @@
 
                 <form
                     action="<?php echo htmlspecialchars(url('admin/editar') . '?id=' . (int) $produto_id, ENT_QUOTES, 'UTF-8'); ?>"
-                    method="POST" enctype="multipart/form-data" class="px-8 py-7 space-y-6">
+                    method="POST" enctype="multipart/form-data" class="px-4 md:px-8 py-6 md:py-7 space-y-6">
                     <?php echo csrf_field(); ?>
 
                     <div class="space-y-1.5">
@@ -183,13 +183,13 @@
                         <label for="estoque" class="block text-sm font-semibold text-gray-700">Estoque</label>
                         <input type="number" name="estoque" id="estoque" min="0" placeholder="0"
                             value="<?php echo htmlspecialchars((string) ($produto['estoque'] ?? '0'), ENT_QUOTES, 'UTF-8'); ?>"
-                            class="form-input px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white w-32" />
+                            class="form-input px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white w-full sm:w-32" />
                     </div>
 
                     <?php if (!empty($produto['imagem'])): ?>
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-gray-700">Imagem Atual</label>
-                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                                 <img
                                     src="<?php echo asset_url('images/produtos/' . htmlspecialchars((string) ($produto['imagem'] ?? ''), ENT_QUOTES, 'UTF-8')); ?>"
                                     alt="Imagem atual" class="h-20 w-20 object-cover rounded-xl border border-gray-200 shadow-sm" />

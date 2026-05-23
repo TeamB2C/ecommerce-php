@@ -87,7 +87,7 @@
           </a>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="hidden md:block overflow-x-auto">
           <table class="w-full text-left">
             <thead>
               <tr class="bg-gray-50/50">
@@ -164,6 +164,65 @@
             </tbody>
           </table>
         </div>
+
+        <div class="md:hidden px-4 py-4 space-y-3">
+          <?php if (!empty($produtos)): ?>
+            <?php foreach ($produtos as $produto): ?>
+              <article class="border border-gray-100 rounded-2xl p-4 bg-white shadow-sm">
+                <div class="flex items-start gap-3">
+                  <div class="h-14 w-14 rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex-shrink-0">
+                    <?php if (!empty($produto['imagem'])): ?>
+                      <img
+                        src="<?php echo asset_url('images/produtos/' . htmlspecialchars($produto['imagem'], ENT_QUOTES, 'UTF-8')); ?>"
+                        class="h-full w-full object-cover" />
+                    <?php else: ?>
+                      <div class="h-full w-full bg-pink-50 flex items-center justify-center text-pink-200">
+                        <i class="fas fa-image text-xl"></i>
+                      </div>
+                    <?php endif; ?>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-gray-900 break-words">
+                      <?php echo htmlspecialchars($produto['nome'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>
+                    </h3>
+                    <div class="mt-2 flex items-center gap-2 flex-wrap">
+                      <span class="px-2 py-1 bg-white border border-pink-100 text-pink-600 rounded-full text-[10px] font-black uppercase tracking-wider">
+                        <?php echo htmlspecialchars($produto['categoria'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>
+                      </span>
+                      <span class="text-xs font-bold text-gray-500">
+                        Estoque: <?php echo htmlspecialchars((string) ($produto['estoque'] ?? '0'), ENT_QUOTES, 'UTF-8'); ?>
+                      </span>
+                    </div>
+                    <p class="mt-2 text-sm font-extrabold text-gray-900">
+                      R$ <?php echo number_format((float) ($produto['preco'] ?? 0), 2, ',', '.'); ?>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mt-4 flex items-center justify-end gap-2">
+                  <a href="<?php echo url('admin/editar'); ?>?id=<?php echo (int) $produto['id']; ?>"
+                    class="h-9 w-9 flex items-center justify-center bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm"
+                    title="Editar">
+                    <i class="fas fa-edit text-sm"></i>
+                  </a>
+                  <form id="remover-form-mobile-<?php echo (int) $produto['id']; ?>"
+                    action="<?php echo url('admin/remover'); ?>" method="POST" class="m-0">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="id" value="<?php echo (int) $produto['id']; ?>">
+                    <button type="button" onclick="confirmarRemocaoMobile(<?php echo (int) $produto['id']; ?>)"
+                      class="h-9 w-9 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                      title="Remover">
+                      <i class="fas fa-trash text-sm"></i>
+                    </button>
+                  </form>
+                </div>
+              </article>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <div class="py-8 text-center text-gray-400">Nenhum produto encontrado.</div>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
   </div>
@@ -184,6 +243,26 @@
       }).then((result) => {
         if (result.isConfirmed) {
           const form = document.getElementById('remover-form-' + id);
+          if (form) form.submit();
+        }
+      })
+    }
+
+    function confirmarRemocaoMobile(id) {
+      Swal.fire({
+        title: 'Excluir item?',
+        text: "Esta ação removerá o produto permanentemente.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar',
+        background: '#fff',
+        borderRadius: '24px'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const form = document.getElementById('remover-form-mobile-' + id);
           if (form) form.submit();
         }
       })

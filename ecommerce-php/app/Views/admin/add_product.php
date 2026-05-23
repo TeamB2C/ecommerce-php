@@ -76,7 +76,7 @@
             include __DIR__ . '/../partials/admin/topbar.php';
             ?>
 
-            <div class="flex items-center gap-2 text-sm text-gray-400">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-gray-400">
                 <a href="<?php echo url('admin/produtos'); ?>"
                     class="hover:text-pink-600 transition-colors font-medium">Produtos</a>
                 <i class="fas fa-chevron-right text-xs"></i>
@@ -90,8 +90,8 @@
                 </div>
             <?php endif; ?>
 
-            <div class="glass-card rounded-3xl shadow-sm overflow-hidden max-w-3xl">
-                <div class="px-8 py-6 border-b border-gray-100 flex items-center gap-4">
+            <div class="glass-card rounded-3xl shadow-sm overflow-hidden max-w-3xl mx-auto">
+                <div class="px-4 md:px-8 py-5 md:py-6 border-b border-gray-100 flex items-center gap-4">
                     <a href="<?php echo url('admin/produtos'); ?>"
                         class="h-9 w-9 flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl hover:bg-pink-50 hover:text-pink-600 transition-all">
                         <i class="fas fa-arrow-left text-sm"></i>
@@ -103,7 +103,7 @@
                 </div>
 
                 <form action="<?php echo htmlspecialchars(url('admin/adicionar'), ENT_QUOTES, 'UTF-8'); ?>" method="POST"
-                    enctype="multipart/form-data" class="px-8 py-7 space-y-6">
+                    enctype="multipart/form-data" class="px-4 md:px-8 py-6 md:py-7 space-y-6">
                     <?php echo csrf_field(); ?>
 
                     <div class="space-y-1.5">
@@ -169,7 +169,7 @@
                         <label for="estoque" class="block text-sm font-semibold text-gray-700">Estoque</label>
                         <input type="number" name="estoque" id="estoque" min="0" placeholder="0"
                             value="<?php echo old('estoque', '0'); ?>"
-                            class="form-input px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white w-32" />
+                            class="form-input px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white w-full sm:w-32" />
                     </div>
 
                     <div class="space-y-2">

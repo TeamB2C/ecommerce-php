@@ -90,7 +90,7 @@
         </div>
 
         <!-- Tabela Desktop -->
-        <div class="overflow-x-auto">
+        <div class="hidden md:block overflow-x-auto">
           <table class="w-full text-left">
             <thead>
               <tr class="bg-gray-50/50">
@@ -167,6 +167,63 @@
           </table>
         </div>
 
+        <!-- Lista Mobile -->
+        <div class="md:hidden px-4 py-4 space-y-3">
+          <?php if (!empty($categorias)): ?>
+            <?php foreach ($categorias as $categoria): ?>
+              <article class="border border-gray-100 rounded-2xl p-4 bg-white shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-[11px] font-bold text-gray-300 uppercase tracking-widest">
+                      #<?php echo str_pad((string) $categoria['id'], 3, '0', STR_PAD_LEFT); ?>
+                    </p>
+                    <h3 class="text-sm font-bold text-gray-900 mt-1 break-words">
+                      <?php echo htmlspecialchars($categoria['nome'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1 break-words">
+                      <?php echo htmlspecialchars(
+                        !empty($categoria['descricao']) ? $categoria['descricao'] : 'Sem descrição.',
+                        ENT_QUOTES,
+                        'UTF-8'
+                      ); ?>
+                    </p>
+                  </div>
+
+                  <div class="flex items-center gap-2 shrink-0">
+                    <a href="<?php echo url('admin/categorias/editar'); ?>?id=<?php echo (int) $categoria['id']; ?>"
+                      class="h-9 w-9 flex items-center justify-center bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-500 hover:text-white transition-all shadow-sm"
+                      title="Editar">
+                      <i class="fas fa-edit text-sm"></i>
+                    </a>
+                    <form id="remover-cat-mobile-<?php echo (int) $categoria['id']; ?>"
+                      action="<?php echo url('admin/categorias/remover'); ?>" method="POST" class="m-0">
+                      <?php echo csrf_field(); ?>
+                      <input type="hidden" name="id" value="<?php echo (int) $categoria['id']; ?>">
+                      <button type="button"
+                        onclick="confirmarRemocaoCategoriaMobile(<?php echo (int) $categoria['id']; ?>)"
+                        class="h-9 w-9 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                        title="Remover">
+                        <i class="fas fa-trash text-sm"></i>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </article>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <div class="py-8 text-center">
+              <div class="flex flex-col items-center gap-3 text-gray-300">
+                <i class="fas fa-tags text-4xl"></i>
+                <p class="text-sm font-bold text-gray-400">Nenhuma categoria encontrada</p>
+                <a href="<?php echo url('admin/categorias/adicionar'); ?>"
+                  class="btn-grad text-white text-xs font-bold px-4 py-2 rounded-xl mt-1">
+                  Criar primeira categoria
+                </a>
+              </div>
+            </div>
+          <?php endif; ?>
+        </div>
+
       </div>
     </div>
   </div>
@@ -186,6 +243,25 @@
       }).then((result) => {
         if (result.isConfirmed) {
           const form = document.getElementById('remover-cat-' + id);
+          if (form) form.submit();
+        }
+      });
+    }
+
+    function confirmarRemocaoCategoriaMobile(id) {
+      Swal.fire({
+        title: 'Remover Categoria?',
+        text: "Os produtos vinculados não serão apagados, mas ficarão sem categoria.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'Sim, remover!',
+        cancelButtonText: 'Manter',
+        background: '#fff'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const form = document.getElementById('remover-cat-mobile-' + id);
           if (form) form.submit();
         }
       });
