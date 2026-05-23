@@ -24,6 +24,9 @@ $router->add('auth.send_reset', fn() => $authController->sendReset());
 $router->add('auth.reset_password', fn() => $authController->resetPassword());
 $router->add('auth.update_password', fn() => $authController->updatePassword());
 
+$router->add('auth.google_login', fn() => (new \App\Controllers\GoogleController($pdo))->login());
+$router->add('auth.google_callback', fn() => (new \App\Controllers\GoogleController($pdo))->callback());
+
 $router->add('cart.add', fn() => $cartController->add());
 $router->add('cart.update', fn() => $cartController->update());
 $router->add('cart.remove', fn() => $cartController->remove());

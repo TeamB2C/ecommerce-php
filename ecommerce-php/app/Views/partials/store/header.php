@@ -73,6 +73,14 @@ $to = static fn(string $route = ''): string => url($route);
 
                 <?php if ($usuario['logado']): ?>
                     <div class="perfil-dropdown" id="perfil-dropdown">
+                        <div class="perfil-dropdown-user">
+                            <strong>
+                                <?php echo htmlspecialchars((string) ($usuario['nome'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+                            </strong>
+                            <?php if (!empty($_SESSION['email'])): ?>
+                                <span><?php echo htmlspecialchars((string) $_SESSION['email'], ENT_QUOTES, 'UTF-8'); ?></span>
+                            <?php endif; ?>
+                        </div>
                         <a href="<?php echo $to('perfil'); ?>">Gerenciar Perfil</a>
                         <?php if ($usuario['is_admin']): ?>
                             <a href="<?php echo $to('admin'); ?>">Painel Admin</a>
@@ -201,6 +209,52 @@ $to = static fn(string $route = ''): string => url($route);
         </div>
     <?php endif; ?>
 </aside>
+
+<?php if (!$usuario['logado']): ?>
+<div class="auth-modal" id="authModal" aria-hidden="true">
+    <div class="auth-modal__dialog" role="dialog" aria-modal="true" aria-label="Entrar ou registrar">
+        <button type="button" class="auth-modal__close" id="authModalClose" aria-label="Fechar">
+            <i class='bx bx-x'></i>
+        </button>
+        <div class="auth-modal__tabs">
+            <button type="button" class="auth-modal__tab is-active" data-auth-tab="login">Entrar</button>
+            <button type="button" class="auth-modal__tab" data-auth-tab="register">Registrar</button>
+        </div>
+
+        <div class="auth-modal__panel is-active" data-auth-panel="login">
+            <h3 class="auth-modal__title">Acesse sua conta</h3>
+            <form method="POST" action="<?php echo url('login'); ?>" class="auth-modal__form">
+                <?php echo csrf_field(); ?>
+                <input type="hidden" name="acao" value="login">
+                <label for="auth-login-email">E-mail</label>
+                <input id="auth-login-email" type="email" name="email" required>
+                <label for="auth-login-senha">Senha</label>
+                <input id="auth-login-senha" type="password" name="senha" required>
+                <a href="<?php echo url('forgot-password'); ?>" class="auth-modal__forgot">Esqueceu a senha?</a>
+                <button type="submit" class="auth-modal__submit">Entrar</button>
+                <a href="<?php echo url('google-login'); ?>" class="auth-modal__google">
+                    <i class='bx bxl-google'></i> Entrar com Google
+                </a>
+            </form>
+        </div>
+
+        <div class="auth-modal__panel" data-auth-panel="register">
+            <h3 class="auth-modal__title">Crie sua conta</h3>
+            <form method="POST" action="<?php echo url('login'); ?>" class="auth-modal__form">
+                <?php echo csrf_field(); ?>
+                <input type="hidden" name="acao" value="registrar">
+                <label for="auth-register-nome">Nome</label>
+                <input id="auth-register-nome" type="text" name="nome" required>
+                <label for="auth-register-email">E-mail</label>
+                <input id="auth-register-email" type="email" name="email" required>
+                <label for="auth-register-senha">Senha</label>
+                <input id="auth-register-senha" type="password" name="senha" required>
+                <button type="submit" class="auth-modal__submit">Registrar</button>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <div id="cartModal" class="cart-modal">
     <div class="cart-modal__content">
@@ -899,8 +953,8 @@ $to = static fn(string $route = ''): string => url($route);
     height: 20px;
 }
 
-/* Abrir menu */
-.perfil-menu-container:hover .perfil-dropdown{
+/* Abrir menu por clique */
+.perfil-dropdown.ativo{
     opacity: 1;
     visibility: visible;
 
@@ -957,6 +1011,159 @@ $to = static fn(string $route = ''): string => url($route);
 .logout-btn:hover{
     background: #fff5f5 !important;
     color: #b00020 !important;
+}
+
+.perfil-dropdown-user{
+    padding: 12px 18px 10px;
+    border-bottom: 1px solid #f5f5f5;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.perfil-dropdown-user strong{
+    font-size: .92rem;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.2;
+}
+
+.perfil-dropdown-user span{
+    font-size: .8rem;
+    color: #6b7280;
+    line-height: 1.2;
+    word-break: break-all;
+}
+
+.auth-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 16px;
+}
+
+.auth-modal.is-open { display: flex; }
+
+.auth-modal__dialog {
+    width: min(560px, 100%);
+    background: #fff;
+    border-radius: 24px;
+    padding: 18px 22px 22px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
+}
+
+.auth-modal__close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    border: 0;
+    background: transparent;
+    color: #8a8a8a;
+    font-size: 38px;
+    cursor: pointer;
+}
+
+.auth-modal__tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 8px 36px 14px 6px;
+}
+
+.auth-modal__tab {
+    height: 54px;
+    border-radius: 16px;
+    border: 1px solid #ecc7da;
+    background: #fff;
+    color: #444;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-modal__tab.is-active {
+    border-color: #cb197f;
+    background: #cb197f;
+    color: #fff;
+}
+
+.auth-modal__panel { display: none; }
+.auth-modal__panel.is-active { display: block; }
+
+.auth-modal__title {
+    margin: 0 0 14px;
+    font-size: 22px;
+    color: #20242c;
+}
+
+.auth-modal__form {
+    display: grid;
+    gap: 10px;
+}
+
+.auth-modal__form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a4a4a;
+}
+
+.auth-modal__form input {
+    height: 50px;
+    border-radius: 14px;
+    border: 1px solid #dcdcdc;
+    padding: 0 14px;
+    font-size: 17px;
+}
+
+.auth-modal__forgot {
+    margin-top: 4px;
+    text-decoration: none;
+    color: #666;
+    font-size: 12px;
+}
+
+.auth-modal__submit,
+.auth-modal__google {
+    height: 58px;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal__submit {
+    border: 0;
+    background: #cb197f;
+    color: #fff;
+}
+
+.auth-modal__google {
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #222;
+    gap: 8px;
+}
+
+.auth-modal__google i { color: #ea4335; font-size: 22px; }
+
+@media (max-width: 767px) {
+    .auth-modal { padding: 8px; align-items: flex-start; }
+    .auth-modal__dialog { border-radius: 18px; padding: 14px; }
+    .auth-modal__tabs { margin: 10px 34px 12px 0; gap: 10px; }
+    .auth-modal__tab { height: 52px; font-size: 16px; border-radius: 14px; }
+    .auth-modal__title { font-size: 24px; margin-bottom: 8px; }
+    .auth-modal__form label { font-size: 16px; }
+    .auth-modal__form input { height: 52px; font-size: 16px; }
+    .auth-modal__submit, .auth-modal__google { height: 54px; font-size: 16px; }
 }
 </style>
 
@@ -1210,4 +1417,42 @@ $to = static fn(string $route = ''): string => url($route);
         window.open(`https://wa.me/5511972093780?text=${encodeURIComponent(msg)}`, '_blank');
         fecharModal();
     });
+
+    (function initAuthModal() {
+        const trigger = document.getElementById('perfil-link');
+        const authModal = document.getElementById('authModal');
+        const closeBtn = document.getElementById('authModalClose');
+        const tabs = document.querySelectorAll('[data-auth-tab]');
+        const panels = document.querySelectorAll('[data-auth-panel]');
+
+        if (!trigger || !authModal) return;
+
+        const closeModal = () => {
+            authModal.classList.remove('is-open');
+            document.body.style.overflow = '';
+        };
+
+        const switchTab = (target) => {
+            tabs.forEach((tab) => tab.classList.toggle('is-active', tab.dataset.authTab === target));
+            panels.forEach((panel) => panel.classList.toggle('is-active', panel.dataset.authPanel === target));
+        };
+
+        trigger.addEventListener('click', function(e) {
+            if ('<?php echo $usuario['logado'] ? 'true' : 'false'; ?>' === 'true') return;
+            e.preventDefault();
+            authModal.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeBtn?.addEventListener('click', closeModal);
+        authModal.addEventListener('click', function(e) {
+            if (e.target === authModal) closeModal();
+        });
+
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', function() {
+                switchTab(tab.dataset.authTab);
+            });
+        });
+    })();
 </script>

@@ -23,11 +23,11 @@ class Cart
         }
 
         $dbCart = $this->loadFromDatabase($userId);
-        $mergedCart = $dbCart;
+        // Preserve current session order to avoid visual reordering in the cart UI.
+        $mergedCart = $sessionCart;
 
-        // Prioritize session items to avoid losing recent additions when
-        // database synchronization fails partially.
-        foreach ($sessionCart as $productId => $quantity) {
+        // Merge database state without changing existing item order.
+        foreach ($dbCart as $productId => $quantity) {
             $productId = (int) $productId;
             $quantity = max(1, (int) $quantity);
             if ($productId <= 0) {
@@ -139,6 +139,32 @@ class Cart
         return $total;
     }
 
+    public function detailedItems(): array
+    {
+        $detailed = [];
+
+        foreach ($this->items() as $productId => $quantity) {
+            $stmt = $this->pdo->prepare('SELECT * FROM produtos WHERE id = :id');
+            $stmt->execute(['id' => (int) $productId]);
+            $product = $stmt->fetch();
+
+            if (!$product) {
+                continue;
+            }
+
+            $qty = max(1, (int) $quantity);
+            $price = (float) ($product['preco'] ?? 0);
+
+            $detailed[] = [
+                'produto' => $product,
+                'quantidade' => $qty,
+                'subtotal' => $price * $qty,
+            ];
+        }
+
+        return $detailed;
+    }
+
     private function currentUserId(): ?int
     {
         return isset($_SESSION['usuario_id']) ? (int) $_SESSION['usuario_id'] : null;
@@ -163,7 +189,7 @@ class Cart
     private function loadFromDatabase(int $userId): array
     {
         try {
-            $stmt = $this->pdo->prepare('SELECT produto_id, quantidade FROM carrinho WHERE usuario_id = :usuario_id');
+            $stmt = $this->pdo->prepare('SELECT produto_id, quantidade FROM carrinho WHERE usuario_id = :usuario_id ORDER BY produto_id ASC');
             $stmt->execute(['usuario_id' => $userId]);
             $rows = $stmt->fetchAll();
         } catch (Throwable) {

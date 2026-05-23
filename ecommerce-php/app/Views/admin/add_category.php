@@ -22,7 +22,7 @@
       include __DIR__ . '/../partials/admin/topbar.php';
       ?>
 
-      <div class="w-full max-w-xl bg-white p-6 md:p-8 rounded-xl shadow space-y-5">
+      <div class="w-full max-w-xl mx-auto bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow space-y-5">
         <div class="flex items-center gap-3">
           <a href="<?php echo url('admin/categorias'); ?>" class="text-gray-400 hover:text-pink-600 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"

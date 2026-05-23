@@ -1,0 +1,7 @@
+﻿<?php
+
+return [
+    'client_id' => '177790067959-837lidi950qciet2bk8odki9dv2n763e.apps.googleusercontent.com',
+    'client_secret' => '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',
+    'redirect_uri' => 'http://localhost/ecommerce-php/public/google-callback.php',
+];

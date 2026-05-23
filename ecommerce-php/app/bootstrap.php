@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 spl_autoload_register(function (string $class): void {
     $prefix = 'App\\';
@@ -49,3 +49,4 @@ return [
     'pdo' => $pdo,
     'router' => $router,
 ];
+

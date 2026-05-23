@@ -23,10 +23,14 @@ class StoreController extends Controller
 
     public function home(): void
     {
+        $items = $this->cartModel->detailedItems();
+
         $this->view('store.home', [
             'produtos' => $this->productModel->all(),
             'usuario' => $this->currentUser(),
             'total_itens_carrinho' => $this->cartModel->countItems(),
+            'itens_carrinho' => $items,
+            'total_carrinho' => $this->cartModel->total(),
         ]);
     }
 
@@ -42,11 +46,15 @@ class StoreController extends Controller
             $this->redirect('');
         }
 
+        $items = $this->cartModel->detailedItems();
+
         $this->view('store.product', [
             'produto' => $produto,
             'relacionados' => $this->productModel->related((string) ($produto['categoria'] ?? ''), (int) $produto['id']),
             'usuario' => $this->currentUser(),
             'total_itens_carrinho' => $this->cartModel->countItems(),
+            'itens_carrinho' => $items,
+            'total_carrinho' => $this->cartModel->total(),
         ]);
     }
 

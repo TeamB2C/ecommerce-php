@@ -1,7 +1,7 @@
 ﻿<?php
 $current = $current ?? '';
 ?>
-<aside class="w-64 shrink-0 bg-white border-r border-gray-100 flex flex-col min-h-screen sticky top-0">
+<aside class="hidden md:flex w-64 shrink-0 bg-white border-r border-gray-100 flex-col min-h-screen sticky top-0">
 
   <!-- Logo -->
   <div class="px-6 py-5 border-b border-gray-100">
